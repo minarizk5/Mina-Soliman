@@ -1,0 +1,35 @@
+<div id="custom-popup" class="popup-custom" aria-hidden="true">
+  <div class="popup-custom__overlay" data-popup-close tabindex="-1"></div>
+  <div class="popup-custom__content" role="dialog" aria-modal="true" aria-labelledby="popup-title">
+    <button type="button" class="popup-custom__close" data-popup-close aria-label="Close popup">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+    
+    <div class="popup-custom__body">
+      <div class="popup-custom__image-wrapper">
+        <img id="popup-image" src="" alt="" class="popup-custom__image">
+      </div>
+      
+      <div class="popup-custom__details">
+        <h2 id="popup-title" class="popup-custom__title"></h2>
+        <div id="popup-price" class="popup-custom__price"></div>
+        <div id="popup-description" class="popup-custom__description"></div>
+        
+        <form id="popup-form" class="popup-custom__form">
+          <input type="hidden" name="id" id="popup-variant-id" value="">
+          
+          <div id="popup-options" class="popup-custom__options"></div>
+          
+          <div class="popup-custom__error" id="popup-error" aria-live="polite"></div>
+          
+          <button type="submit" id="popup-add-to-cart" class="popup-custom__submit" disabled>
+            <span class="popup-custom__submit-text">ADD TO CART -></span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

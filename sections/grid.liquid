@@ -1,0 +1,577 @@
+{% comment %}
+  ============================================================================
+  Section: Grid (Custom)
+  ============================================================================
+  A 3×2 product image grid section built 100% from scratch for the
+  EcomExperts hiring test. Matches the Figma "Test for Candidates" design
+  — specifically the "Tisso vison in the wild" section.
+
+  Constraints:
+  - No Dawn snippets, components, or ready-made sections used.
+  - No jQuery — vanilla JavaScript only.
+  - Fully responsive (3 cols desktop → 2 cols mobile).
+  - Scoped CSS with .grid-custom prefix to avoid collisions with Dawn.
+  - Each product is selectable from the Shopify customizer via blocks.
+
+  Design Specs (Confirmed from Figma):
+  ──────────────────────────────────────────────
+  Layout:
+    Desktop (≥750px):   3 columns, 20px gap, max-width 1200px
+    Mobile  (≤749px):   2 columns, 12px gap
+
+  Cards:
+    Content:            Product image ONLY + floating circular "+" button
+    Aspect ratio:       1:1 (square)
+    Border-radius:      0px (sharp corners)
+    Hover:              Subtle dark overlay + icon highlight
+
+  Typography:
+    Section heading:    Playfair Display, ~36px, 700, #000000, left-aligned
+    Heading text:       "Tisso vison in the wild"
+
+  Colors:
+    Section bg:         #FFFFFF
+    Card bg / placeholder: #F5F5F5
+    "+" icon:           White circle with black "+"
+    Hover overlay:      rgba(0, 0, 0, 0.25)
+
+  No titles, prices, or badges visible on the grid cards.
+  All product details are embedded as JSON for the Phase 3 popup.
+  ============================================================================
+{% endcomment %}
+
+{%- comment -%} ── Load Google Fonts (same as Banner for consistency) ── {%- endcomment -%}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
+{%- comment -%} ══════════════════════════════════════════════════════════════
+     SECTION MARKUP
+     ══════════════════════════════════════════════════════════════ {%- endcomment -%}
+<section class="grid-custom" id="grid-{{ section.id }}">
+
+  {%- comment -%} ── SECTION HEADING ──
+    Left-aligned serif heading matching the banner's Playfair Display.
+    Editable from the customizer.
+  {%- endcomment -%}
+  {% if section.settings.heading != blank %}
+    <div class="grid-custom__header">
+      <h2 class="grid-custom__heading">
+        {{ section.settings.heading }}
+      </h2>
+    </div>
+  {% endif %}
+
+  {%- comment -%} ── PRODUCT GRID ──
+    CSS Grid: 3 columns on desktop, 2 on mobile.
+    Each block is a product_card block with a product picker.
+    Cards render only the product's featured image + a floating "+" icon.
+  {%- endcomment -%}
+  <div class="grid-custom__grid">
+
+    {% for block in section.blocks %}
+      {%- comment -%} Assign the product from the block's picker setting {%- endcomment -%}
+      {%- assign product = block.settings.product -%}
+
+      {%- comment -%}
+        ════════════════════════════════════════════════════════════
+        PRODUCT CARD WRAPPER
+        ════════════════════════════════════════════════════════════
+        Phase 3 Popup Integration Point:
+        ─────────────────────────────────
+        This <div> carries `data-product-handle` and `data-product-id`
+        attributes that Phase 3 will use to identify which product was
+        clicked. The full product JSON is embedded in a <script> tag
+        inside each card so the popup can render instantly without
+        fetching from the Storefront API.
+
+        Phase 3 should:
+        1. Listen for clicks on `.grid-custom__card` elements
+        2. Read `data-product-handle` from the clicked card
+        3. Parse the JSON from the sibling <script> tag
+        4. Render the popup with title, price, variants, description
+        ════════════════════════════════════════════════════════════
+      {%- endcomment -%}
+      <div
+        class="grid-custom__card"
+        {{ block.shopify_attributes }}
+        {% if product != blank %}
+          data-product-handle="{{ product.handle }}"
+          data-product-id="{{ product.id }}"
+        {% endif %}
+      >
+
+        {%- comment -%} ── Product Image ──
+          Square (1:1) aspect ratio, object-fit: cover.
+          Falls back to a placeholder SVG when no product is assigned.
+        {%- endcomment -%}
+        <div class="grid-custom__card-image-wrapper">
+          {% if product != blank and product.featured_image != blank %}
+            <img
+              class="grid-custom__card-image"
+              src="{{ product.featured_image | image_url: width: 600 }}"
+              srcset="
+                {{ product.featured_image | image_url: width: 300 }} 300w,
+                {{ product.featured_image | image_url: width: 450 }} 450w,
+                {{ product.featured_image | image_url: width: 600 }} 600w,
+                {{ product.featured_image | image_url: width: 800 }} 800w
+              "
+              sizes="(max-width: 749px) 45vw, 30vw"
+              alt="{{ product.featured_image.alt | default: product.title | escape }}"
+              width="{{ product.featured_image.width }}"
+              height="{{ product.featured_image.height }}"
+              loading="lazy"
+            >
+          {% else %}
+            {%- comment -%} Placeholder when no product/image is assigned {%- endcomment -%}
+            <div class="grid-custom__card-placeholder" aria-hidden="true">
+              <svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="400" height="400" fill="#F5F5F5"/>
+                <path d="M160 160h80v80h-80z" stroke="#D4D4D4" stroke-width="2" fill="none"/>
+                <circle cx="185" cy="185" r="10" stroke="#D4D4D4" stroke-width="2" fill="none"/>
+                <path d="M160 230 l30-40 l20 20 l15-10 l35 30" stroke="#D4D4D4" stroke-width="2" fill="none"/>
+              </svg>
+            </div>
+          {% endif %}
+
+          {%- comment -%} ── Hover overlay ──
+            Semi-transparent dark overlay that fades in on hover.
+            Makes the white "+" icon more visible.
+          {%- endcomment -%}
+          <div class="grid-custom__card-overlay" aria-hidden="true"></div>
+
+          {%- comment -%} ── Floating "+" Icon ──
+            Circular white button centered over the image.
+            Hidden by default, appears on hover with a
+            scale-up animation for a polished feel.
+
+            Phase 3 will attach click handlers to this
+            button to open the product popup.
+          {%- endcomment -%}
+          {% if product != blank %}
+            <button
+              type="button"
+              class="grid-custom__card-action"
+              aria-label="View {{ product.title | escape }} details"
+              data-grid-popup-trigger="{{ product.handle }}"
+            >
+              <span class="grid-custom__card-action-icon" aria-hidden="true">+</span>
+            </button>
+          {% endif %}
+        </div>
+
+        {%- comment -%}
+          ══════════════════════════════════════════════════════════
+          PRODUCT JSON DATA (Phase 3 Popup Integration)
+          ══════════════════════════════════════════════════════════
+          This <script> tag contains the full product data as JSON.
+          Phase 3 will parse this to populate the popup overlay with:
+          - Product title, description, price
+          - All variant data (sizes, colors, etc.)
+          - All product images for a gallery
+          - Product URL for "View full details" link
+
+          This approach avoids any additional API requests and ensures
+          the popup renders instantly on click.
+          ══════════════════════════════════════════════════════════
+        {%- endcomment -%}
+        {% if product != blank %}
+          <script type="application/json" class="grid-custom__product-json">
+            {
+              "id": {{ product.id }},
+              "title": {{ product.title | json }},
+              "handle": {{ product.handle | json }},
+              "description": {{ product.description | json }},
+              "url": {{ product.url | json }},
+              "price": {{ product.price }},
+              "price_formatted": {{ product.price | money | json }},
+              "compare_at_price": {{ product.compare_at_price | default: 0 }},
+              "compare_at_price_formatted": {{ product.compare_at_price | money | json }},
+              "available": {{ product.available }},
+              "featured_image": {{ product.featured_image | image_url: width: 800 | json }},
+              "images": [
+                {%- for image in product.images -%}
+                  {
+                    "src": {{ image | image_url: width: 800 | json }},
+                    "alt": {{ image.alt | default: product.title | json }},
+                    "width": {{ image.width }},
+                    "height": {{ image.height }}
+                  }{% unless forloop.last %},{% endunless %}
+                {%- endfor -%}
+              ],
+              "variants": [
+                {%- for variant in product.variants -%}
+                  {
+                    "id": {{ variant.id }},
+                    "title": {{ variant.title | json }},
+                    "price": {{ variant.price }},
+                    "price_formatted": {{ variant.price | money | json }},
+                    "compare_at_price": {{ variant.compare_at_price | default: 0 }},
+                    "available": {{ variant.available }},
+                    "sku": {{ variant.sku | json }},
+                    "option1": {{ variant.option1 | json }},
+                    "option2": {{ variant.option2 | json }},
+                    "option3": {{ variant.option3 | json }},
+                    "featured_image": {% if variant.featured_image %}{{ variant.featured_image | image_url: width: 800 | json }}{% else %}null{% endif %}
+                  }{% unless forloop.last %},{% endunless %}
+                {%- endfor -%}
+              ],
+              "options": {{ product.options_with_values | json }},
+              "vendor": {{ product.vendor | json }},
+              "type": {{ product.type | json }},
+              "tags": {{ product.tags | json }}
+            }
+          </script>
+        {% endif %}
+
+      </div>
+    {% endfor %}
+
+  </div>
+
+</section>
+
+{%- comment -%} ══════════════════════════════════════════════════════════════
+     SCOPED CSS — All rules prefixed with .grid-custom
+     ══════════════════════════════════════════════════════════════
+     - CSS Grid for layout (3-col desktop → 2-col mobile)
+     - 1:1 aspect ratio on cards
+     - Floating "+" icon with hover overlay
+     - Sharp corners throughout (matching banner aesthetic)
+     - No Dawn style collisions
+     ══════════════════════════════════════════════════════════════ {%- endcomment -%}
+{% style %}
+  /* ──────────────────────────────────────────────
+     SECTION CONTAINER
+     ────────────────────────────────────────────── */
+  .grid-custom {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 60px 24px;
+    box-sizing: border-box;
+    background-color: #FFFFFF;
+  }
+
+  /* ──────────────────────────────────────────────
+     SECTION HEADING
+     ────────────────────────────────────────────── */
+  .grid-custom__header {
+    margin-bottom: 32px;
+  }
+
+  .grid-custom__heading {
+    font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #000000;
+    text-align: left;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* ──────────────────────────────────────────────
+     GRID LAYOUT
+     ──────────────────────────────────────────────
+     Desktop: 3 equal columns, 20px gap
+     Mobile:  2 equal columns, 12px gap
+     ────────────────────────────────────────────── */
+  .grid-custom__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  /* ──────────────────────────────────────────────
+     PRODUCT CARD
+     ──────────────────────────────────────────────
+     Image-only card with sharp corners.
+     The card itself is a positioning context for
+     the overlay and floating "+" icon.
+     ────────────────────────────────────────────── */
+  .grid-custom__card {
+    position: relative;
+    border-radius: 0;
+    overflow: hidden;
+    cursor: pointer;
+    background-color: #F5F5F5;
+  }
+
+  /* ──────────────────────────────────────────────
+     IMAGE WRAPPER
+     ──────────────────────────────────────────────
+     Enforces 1:1 square aspect ratio.
+     Contains the image, overlay, and "+" icon.
+     ────────────────────────────────────────────── */
+  .grid-custom__card-image-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background-color: #F5F5F5;
+  }
+
+  /* Product image — fills the square container */
+  .grid-custom__card-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.4s ease;
+  }
+
+  /* Subtle zoom on hover for visual feedback */
+  .grid-custom__card:hover .grid-custom__card-image {
+    transform: scale(1.03);
+  }
+
+  /* Placeholder SVG — fills the container when no image */
+  .grid-custom__card-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background-color: #F5F5F5;
+  }
+
+  .grid-custom__card-placeholder svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.5;
+  }
+
+  /* ──────────────────────────────────────────────
+     HOVER OVERLAY
+     ──────────────────────────────────────────────
+     Semi-transparent dark layer that fades in on
+     hover. Makes the white "+" icon pop against
+     any image background.
+     ────────────────────────────────────────────── */
+  .grid-custom__card-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.25);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .grid-custom__card:hover .grid-custom__card-overlay {
+    opacity: 1;
+  }
+
+  /* ──────────────────────────────────────────────
+     FLOATING "+" ACTION BUTTON
+     ──────────────────────────────────────────────
+     Circular white button positioned at the
+     bottom-right of the image. Hidden by default,
+     appears on hover with a scale-up animation
+     for a polished feel.
+
+     Phase 3 will attach click handlers to this
+     button to open the product popup.
+     ────────────────────────────────────────────── */
+  .grid-custom__card-action {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background-color: #FFFFFF;
+    cursor: pointer;
+    padding: 0;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 0.3s ease, transform 0.3s ease, background-color 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Show the "+" icon on card hover */
+  .grid-custom__card:hover .grid-custom__card-action {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* "+" icon hover state — invert colors */
+  .grid-custom__card-action:hover {
+    background-color: #000000;
+  }
+
+  .grid-custom__card-action:hover .grid-custom__card-action-icon {
+    color: #FFFFFF;
+  }
+
+  /* Focus state for keyboard accessibility */
+  .grid-custom__card-action:focus-visible {
+    opacity: 1;
+    transform: scale(1);
+    outline: 2px solid #000000;
+    outline-offset: 2px;
+  }
+
+  /* The "+" symbol */
+  .grid-custom__card-action-icon {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1;
+    color: #000000;
+    transition: color 0.2s ease;
+    user-select: none;
+  }
+
+  /* ──────────────────────────────────────────────
+     RESPONSIVE: MOBILE (≤749px)
+     ──────────────────────────────────────────────
+     - Grid switches from 3 columns to 2 columns
+     - Reduced gaps and section padding
+     - Smaller heading
+     - "+" icon is always visible on mobile (no
+       hover on touch devices)
+     ────────────────────────────────────────────── */
+  @media screen and (max-width: 749px) {
+    .grid-custom {
+      padding: 40px 16px;
+    }
+
+    .grid-custom__heading {
+      font-size: 28px;
+    }
+
+    .grid-custom__header {
+      margin-bottom: 24px;
+    }
+
+    .grid-custom__grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    /* Always show the "+" icon on touch devices
+       since hover is unreliable */
+    .grid-custom__card-action {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .grid-custom__card-action {
+      width: 36px;
+      height: 36px;
+      bottom: 10px;
+      right: 10px;
+    }
+
+    .grid-custom__card-action-icon {
+      font-size: 18px;
+    }
+  }
+
+  /* ──────────────────────────────────────────────
+     RESPONSIVE: TABLET (750px – 989px)
+     ──────────────────────────────────────────────
+     Slightly reduced spacing for mid-range screens.
+     Grid stays at 3 columns.
+     ────────────────────────────────────────────── */
+  @media screen and (min-width: 750px) and (max-width: 989px) {
+    .grid-custom {
+      padding: 50px 20px;
+    }
+
+    .grid-custom__heading {
+      font-size: 32px;
+    }
+
+    .grid-custom__grid {
+      gap: 16px;
+    }
+
+    .grid-custom__card-action {
+      width: 36px;
+      height: 36px;
+    }
+
+    .grid-custom__card-action-icon {
+      font-size: 18px;
+    }
+  }
+{% endstyle %}
+
+{%- comment -%}
+  ============================================================================
+  SCHEMA — Theme Customizer Settings
+  ============================================================================
+  Uses BLOCKS (not flat settings) for the six product cards:
+  - Each block has a single `product` picker setting
+  - Blocks can be reordered via drag-and-drop in the theme editor
+  - max_blocks: 6 enforces the grid limit
+  - Preset pre-creates 6 empty blocks for immediate use
+
+  The section heading is a top-level setting.
+  ============================================================================
+{%- endcomment -%}
+{%- comment -%} ══════════════════════════════════════════════════════════════
+     PHASE 3: PRODUCT POPUP INTEGRATION
+     ══════════════════════════════════════════════════════════════ {%- endcomment -%}
+{% render 'custom-popup' %}
+{{ 'custom-popup.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'custom-popup.js' | asset_url }}" defer="defer"></script>
+
+{% schema %}
+{
+  "name": "Grid (Custom)",
+  "tag": "section",
+  "class": "grid-custom-section",
+  "settings": [
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Section Heading",
+      "default": "Tisso vison in the wild",
+      "info": "Left-aligned heading displayed above the product grid. Supports bold and italic."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "product_card",
+      "name": "Product",
+      "limit": 6,
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product",
+          "info": "Select a product. Its featured image will be displayed in the grid card."
+        }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "presets": [
+    {
+      "name": "Grid (Custom)",
+      "category": "Image",
+      "blocks": [
+        { "type": "product_card" },
+        { "type": "product_card" },
+        { "type": "product_card" },
+        { "type": "product_card" },
+        { "type": "product_card" },
+        { "type": "product_card" }
+      ]
+    }
+  ]
+}
+{% endschema %}

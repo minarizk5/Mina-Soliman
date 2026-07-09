@@ -1,0 +1,1069 @@
+{% comment %}
+  ============================================================================
+  Section: Banner (Custom)
+  ============================================================================
+  A full-width hero banner section built 100% from scratch for the
+  EcomExperts hiring test. Matches the Figma "Test for Candidates" design.
+
+  Constraints:
+  - No Dawn snippets, components, or ready-made sections used.
+  - No jQuery — vanilla JavaScript only (used for popup open/close).
+  - All text inside red rectangles is editable from the Shopify customizer.
+  - Fully responsive (desktop + mobile).
+  - Scoped CSS with .banner-custom prefix to avoid collisions with Dawn.
+
+  Design Specs (Extracted from Figma):
+  ──────────────────────────────────────────────
+  Typography:
+    Heading:     Serif (Playfair Display) | ~52px | Regular/Bold | line-height 1.1 | #000000
+    Subheading:  Sans-serif | ~14px | Regular | normal | #000000
+    Body text:   Sans-serif | ~16px | Regular | line-height ~1.5 | #000000
+    Button text: Sans-serif | ~14-16px | Medium | normal | #FFFFFF (main) / #000000 (top bar)
+
+  Colors:
+    Main background:       #FFFFFF
+    Top/Bottom bar bg:     #F5F5F5
+    Primary text:          #000000
+    Main button bg:        #000000
+    Main button text:      #FFFFFF
+    Top bar button bg:     #FCE300 (yellow)
+    Top bar button text:   #000000
+
+  Layout:
+    Desktop: Text left-aligned, line-art illustration on the right side
+    Mobile:  Vertically stacked, center-aligned, image below text
+    Top bar: Text center, Button right
+    Bottom bar: Centered text, uppercase
+
+  Spacing:
+    Section padding:       ~60-80px top/bottom
+    Container max-width:   ~1200px (content area)
+    Text gap:              16-24px
+    Button padding:        12px / 30px
+    Button border-radius:  0px (sharp corners)
+  ============================================================================
+{% endcomment %}
+
+{%- comment -%} ── Load Google Fonts: Playfair Display (heading) + Inter (body) ── {%- endcomment -%}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+{%- comment -%} ══════════════════════════════════════════════════════════════
+     SECTION MARKUP
+     ══════════════════════════════════════════════════════════════ {%- endcomment -%}
+<section class="banner-custom" id="banner-{{ section.id }}">
+
+  {%- comment -%} ── TOP ANNOUNCEMENT BAR ──
+    Light gray bar with centered promo text and yellow CTA button.
+    Editable: bar text + button label + button URL.
+  {%- endcomment -%}
+  {% if section.settings.top_bar_text != blank or section.settings.top_bar_button_label != blank %}
+    <div class="banner-custom__top-bar">
+      <div class="banner-custom__top-bar-inner">
+
+        {% if section.settings.top_bar_text != blank %}
+          <p class="banner-custom__top-bar-text">
+            {{ section.settings.top_bar_text }}
+          </p>
+        {% endif %}
+
+        {% if section.settings.top_bar_button_label != blank %}
+          <a
+            href="{{ section.settings.top_bar_button_link | default: '#' }}"
+            class="banner-custom__top-bar-btn"
+            aria-label="{{ section.settings.top_bar_button_label | escape }}"
+          >
+            <span class="banner-custom__top-bar-btn-text">{{ section.settings.top_bar_button_label }}</span>
+            {%- comment -%} Arrow icon (→) for CTA feel {%- endcomment -%}
+            <span class="banner-custom__arrow" aria-hidden="true">→</span>
+          </a>
+        {% endif %}
+
+      </div>
+    </div>
+  {% endif %}
+
+  {%- comment -%} ── MAIN BANNER AREA ──
+    Split layout: text content on the left, line-art illustration on the right.
+    On mobile, layout stacks vertically with text on top.
+  {%- endcomment -%}
+  <div class="banner-custom__main">
+    <div class="banner-custom__main-inner">
+
+      {%- comment -%} Left column: Heading, body text, CTA button {%- endcomment -%}
+      <div class="banner-custom__text-col">
+
+        {%- comment -%} Main Heading — Serif font, large display size {%- endcomment -%}
+        {% if section.settings.heading != blank %}
+          <h2 class="banner-custom__heading">
+            {{ section.settings.heading }}
+          </h2>
+        {% endif %}
+
+        {%- comment -%} Body / Description text {%- endcomment -%}
+        {% if section.settings.body_text != blank %}
+          <div class="banner-custom__body">
+            {{ section.settings.body_text }}
+          </div>
+        {% endif %}
+
+        {%- comment -%} Primary CTA Button — "SHOP NOW →" {%- endcomment -%}
+        {% if section.settings.button_label != blank %}
+          <a
+            href="{{ section.settings.button_link | default: '#' }}"
+            class="banner-custom__btn banner-custom__btn--primary"
+            aria-label="{{ section.settings.button_label | escape }}"
+          >
+            <span class="banner-custom__btn-text">{{ section.settings.button_label }}</span>
+            <span class="banner-custom__arrow" aria-hidden="true">→</span>
+          </a>
+        {% endif %}
+
+      </div>
+
+      {%- comment -%} Right column: Background illustration / line-art image {%- endcomment -%}
+      <div class="banner-custom__image-col">
+        {% if section.settings.background_image != blank %}
+          <img
+            class="banner-custom__image"
+            src="{{ section.settings.background_image | image_url: width: 960 }}"
+            alt="{{ section.settings.background_image.alt | default: 'Banner illustration' | escape }}"
+            width="{{ section.settings.background_image.width }}"
+            height="{{ section.settings.background_image.height }}"
+            loading="eager"
+            fetchpriority="high"
+          >
+        {% else %}
+          {%- comment -%} Placeholder when no image is set {%- endcomment -%}
+          <div class="banner-custom__image-placeholder" aria-hidden="true">
+            <svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="400" height="400" fill="#F5F5F5"/>
+              <path d="M200 100 L300 300 L100 300 Z" stroke="#E0E0E0" stroke-width="2" fill="none"/>
+              <circle cx="200" cy="180" r="60" stroke="#E0E0E0" stroke-width="2" fill="none"/>
+            </svg>
+          </div>
+        {% endif %}
+
+        {%- comment -%} Popup trigger button — floats over the image area {%- endcomment -%}
+        {% if section.settings.popup_product_title != blank %}
+          <button
+            type="button"
+            class="banner-custom__popup-trigger"
+            aria-label="View product details"
+            aria-expanded="false"
+            aria-controls="banner-popup-{{ section.id }}"
+            data-banner-popup-open="{{ section.id }}"
+          >
+            <span class="banner-custom__popup-trigger-icon" aria-hidden="true">+</span>
+          </button>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+
+  {%- comment -%} ── BOTTOM BAR ──
+    Light gray bar with centered, uppercase text (sustainability message).
+  {%- endcomment -%}
+  {% if section.settings.bottom_bar_text != blank %}
+    <div class="banner-custom__bottom-bar">
+      <div class="banner-custom__bottom-bar-inner">
+        <p class="banner-custom__bottom-bar-text">
+          {{ section.settings.bottom_bar_text }}
+        </p>
+      </div>
+    </div>
+  {% endif %}
+
+  {%- comment -%} ── PRODUCT POPUP / QUICKVIEW ──
+    Modal overlay with product information. Opens via the "+" trigger
+    on the image area. Closed via the X button or clicking the backdrop.
+    Editable: product title, price, color info, size info, button label.
+  {%- endcomment -%}
+  {% if section.settings.popup_product_title != blank %}
+    <div
+      class="banner-custom__popup-overlay"
+      id="banner-popup-{{ section.id }}"
+      role="dialog"
+      aria-modal="true"
+      aria-label="{{ section.settings.popup_product_title | escape }}"
+      aria-hidden="true"
+      data-banner-popup="{{ section.id }}"
+    >
+      <div class="banner-custom__popup-backdrop" data-banner-popup-close="{{ section.id }}"></div>
+
+      <div class="banner-custom__popup-panel">
+
+        {%- comment -%} Close button {%- endcomment -%}
+        <button
+          type="button"
+          class="banner-custom__popup-close"
+          aria-label="Close product details"
+          data-banner-popup-close="{{ section.id }}"
+        >
+          ✕
+        </button>
+
+        {%- comment -%} Popup product image {%- endcomment -%}
+        {% if section.settings.popup_image != blank %}
+          <div class="banner-custom__popup-image-wrap">
+            <img
+              class="banner-custom__popup-image"
+              src="{{ section.settings.popup_image | image_url: width: 480 }}"
+              alt="{{ section.settings.popup_product_title | escape }}"
+              width="{{ section.settings.popup_image.width }}"
+              height="{{ section.settings.popup_image.height }}"
+              loading="lazy"
+            >
+          </div>
+        {% endif %}
+
+        {%- comment -%} Popup product details {%- endcomment -%}
+        <div class="banner-custom__popup-details">
+
+          {%- comment -%} Product title {%- endcomment -%}
+          <h3 class="banner-custom__popup-title">
+            {{ section.settings.popup_product_title }}
+          </h3>
+
+          {%- comment -%} Product price {%- endcomment -%}
+          {% if section.settings.popup_price != blank %}
+            <p class="banner-custom__popup-price">
+              {{ section.settings.popup_price }}
+            </p>
+          {% endif %}
+
+          {%- comment -%} Color variants info {%- endcomment -%}
+          {% if section.settings.popup_colors != blank %}
+            <div class="banner-custom__popup-meta">
+              <span class="banner-custom__popup-label">Color:</span>
+              <span class="banner-custom__popup-value">{{ section.settings.popup_colors }}</span>
+            </div>
+          {% endif %}
+
+          {%- comment -%} Size info {%- endcomment -%}
+          {% if section.settings.popup_sizes != blank %}
+            <div class="banner-custom__popup-meta">
+              <span class="banner-custom__popup-label">Size:</span>
+              <span class="banner-custom__popup-value">{{ section.settings.popup_sizes }}</span>
+            </div>
+          {% endif %}
+
+          {%- comment -%} Add to Cart button {%- endcomment -%}
+          {% if section.settings.popup_button_label != blank %}
+            <a
+              href="{{ section.settings.popup_button_link | default: '#' }}"
+              class="banner-custom__btn banner-custom__btn--primary banner-custom__popup-btn"
+              aria-label="{{ section.settings.popup_button_label | escape }}"
+            >
+              <span class="banner-custom__btn-text">{{ section.settings.popup_button_label }}</span>
+              <span class="banner-custom__arrow" aria-hidden="true">→</span>
+            </a>
+          {% endif %}
+
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+</section>
+
+{%- comment -%}
+  ============================================================================
+  SCOPED STYLES
+  All rules are prefixed with .banner-custom to prevent style leakage.
+  ============================================================================
+{%- endcomment -%}
+{% style %}
+  /* ════════════════════════════════════════════
+     RESET & BASE
+     ════════════════════════════════════════════ */
+  .banner-custom {
+    position: relative;
+    width: 100%;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: #000000;
+    box-sizing: border-box;
+  }
+
+  .banner-custom *,
+  .banner-custom *::before,
+  .banner-custom *::after {
+    box-sizing: border-box;
+  }
+
+  /* ════════════════════════════════════════════
+     TOP ANNOUNCEMENT BAR
+     Light gray strip with promo text + yellow CTA
+     ════════════════════════════════════════════ */
+  .banner-custom__top-bar {
+    background-color: #F5F5F5;
+    padding: 12px 24px;
+    width: 100%;
+  }
+
+  .banner-custom__top-bar-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .banner-custom__top-bar-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.4;
+    color: #000000;
+    margin: 0;
+  }
+
+  /* Yellow CTA button in the top bar */
+  .banner-custom__top-bar-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 20px;
+    background-color: #FCE300;
+    color: #000000;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .banner-custom__top-bar-btn:hover {
+    background-color: #000000;
+    color: #FFFFFF;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .banner-custom__top-bar-btn:focus-visible {
+    outline: 2px dashed #000000;
+    outline-offset: 3px;
+  }
+
+  /* ════════════════════════════════════════════
+     MAIN BANNER AREA
+     White background, split layout: text left / image right
+     ════════════════════════════════════════════ */
+  .banner-custom__main {
+    background-color: #FFFFFF;
+    padding: 80px 24px;
+    width: 100%;
+  }
+
+  .banner-custom__main-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+  }
+
+  /* ── Text Column (left side) ── */
+  .banner-custom__text-col {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+  }
+
+  /* Main Heading — Serif display font */
+  .banner-custom__heading {
+    font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+    font-size: 52px;
+    font-weight: 700;
+    line-height: 1.1;
+    color: #000000;
+    margin: 0 0 20px 0;
+    letter-spacing: -0.5px;
+  }
+
+  /* Allow italic styling from inline_richtext */
+  .banner-custom__heading em,
+  .banner-custom__heading i {
+    font-style: italic;
+  }
+
+  /* Body / Description text */
+  .banner-custom__body {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.55;
+    color: #000000;
+    margin: 0 0 32px 0;
+    max-width: 480px;
+  }
+
+  /* Reset <p> tags rendered by richtext */
+  .banner-custom__body p {
+    margin: 0 0 12px 0;
+  }
+
+  .banner-custom__body p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* ── Image Column (right side) ── */
+  .banner-custom__image-col {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .banner-custom__image {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: contain;
+  }
+
+  /* Placeholder SVG when no image is configured */
+  .banner-custom__image-placeholder {
+    width: 100%;
+    max-width: 400px;
+    aspect-ratio: 1 / 1;
+  }
+
+  .banner-custom__image-placeholder svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ════════════════════════════════════════════
+     BUTTONS — Shared base styles
+     ════════════════════════════════════════════ */
+
+  /* Base button — black fill, white text, sharp corners */
+  .banner-custom__btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 30px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    border-radius: 0;
+    cursor: pointer;
+    overflow: hidden;
+    transition: color 0.35s ease,
+                background-color 0.35s ease,
+                border-color 0.35s ease,
+                transform 0.35s ease,
+                box-shadow 0.35s ease;
+  }
+
+  /* Button text — above the slide-fill pseudo-element */
+  .banner-custom__btn-text {
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Arrow icon — slides right on hover */
+  .banner-custom__btn .banner-custom__arrow {
+    position: relative;
+    z-index: 2;
+    display: inline-block;
+    transition: transform 0.35s cubic-bezier(0.77, 0, 0.175, 1);
+    font-size: 16px;
+  }
+
+  .banner-custom__btn:hover .banner-custom__arrow {
+    transform: translateX(4px);
+  }
+
+  /* Primary button: black bg → yellow fill on hover */
+  .banner-custom__btn--primary {
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 2px solid #000000;
+  }
+
+  .banner-custom__btn--primary:hover {
+    background-color: #FCE300;
+    color: #000000;
+    border-color: #FCE300;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Focus styles for accessibility */
+  .banner-custom__btn:focus-visible {
+    outline: 2px dashed #000000;
+    outline-offset: 4px;
+  }
+
+  /* ── Arrow used in top-bar button too ── */
+  .banner-custom__top-bar-btn .banner-custom__arrow {
+    display: inline-block;
+    transition: transform 0.3s ease;
+  }
+
+  .banner-custom__top-bar-btn:hover .banner-custom__arrow {
+    transform: translateX(3px);
+  }
+
+  /* ════════════════════════════════════════════
+     POPUP TRIGGER — "+" button over the image
+     ════════════════════════════════════════════ */
+  .banner-custom__popup-trigger {
+    position: absolute;
+    bottom: 20%;
+    right: 20%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #000000;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 50%;
+    font-size: 20px;
+    font-weight: 300;
+    line-height: 1;
+    cursor: pointer;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    z-index: 3;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .banner-custom__popup-trigger:hover {
+    transform: scale(1.1);
+    background-color: #333333;
+  }
+
+  .banner-custom__popup-trigger:focus-visible {
+    outline: 2px dashed #000000;
+    outline-offset: 4px;
+  }
+
+  /* Subtle pulse animation to draw attention */
+  .banner-custom__popup-trigger-icon {
+    animation: banner-custom-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes banner-custom-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  /* ════════════════════════════════════════════
+     BOTTOM BAR
+     Light gray strip with uppercase sustainability text
+     ════════════════════════════════════════════ */
+  .banner-custom__bottom-bar {
+    background-color: #F5F5F5;
+    padding: 16px 24px;
+    width: 100%;
+  }
+
+  .banner-custom__bottom-bar-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .banner-custom__bottom-bar-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #000000;
+    margin: 0;
+  }
+
+  /* ════════════════════════════════════════════
+     PRODUCT POPUP / QUICKVIEW
+     Modal overlay with product information.
+     Hidden by default, shown via vanilla JS.
+     ════════════════════════════════════════════ */
+
+  /* Overlay container — covers entire viewport */
+  .banner-custom__popup-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0.3s, opacity 0.3s ease;
+  }
+
+  /* Active state — toggled by JS */
+  .banner-custom__popup-overlay.is-active {
+    visibility: visible;
+    opacity: 1;
+  }
+
+  /* Dark semi-transparent backdrop */
+  .banner-custom__popup-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+  }
+
+  /* Popup panel — white card with product details */
+  .banner-custom__popup-panel {
+    position: relative;
+    background: #FFFFFF;
+    max-width: 520px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 40px 32px;
+    z-index: 1;
+    transform: translateY(20px);
+    transition: transform 0.3s cubic-bezier(0.33, 1, 0.68, 1);
+  }
+
+  .banner-custom__popup-overlay.is-active .banner-custom__popup-panel {
+    transform: translateY(0);
+  }
+
+  /* Close button — top right of popup */
+  .banner-custom__popup-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: 1px solid #E0E0E0;
+    border-radius: 0;
+    font-size: 14px;
+    color: #000000;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    line-height: 1;
+  }
+
+  .banner-custom__popup-close:hover {
+    background-color: #F5F5F5;
+    border-color: #000000;
+  }
+
+  .banner-custom__popup-close:focus-visible {
+    outline: 2px dashed #000000;
+    outline-offset: 2px;
+  }
+
+  /* Popup product image */
+  .banner-custom__popup-image-wrap {
+    margin-bottom: 24px;
+    background-color: #F9F9F9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .banner-custom__popup-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: contain;
+    max-height: 300px;
+  }
+
+  /* Popup product details */
+  .banner-custom__popup-details {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .banner-custom__popup-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #000000;
+    margin: 0;
+  }
+
+  .banner-custom__popup-price {
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    color: #000000;
+    margin: 0;
+  }
+
+  /* Product meta (color, size) */
+  .banner-custom__popup-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: #000000;
+  }
+
+  .banner-custom__popup-label {
+    font-weight: 600;
+  }
+
+  .banner-custom__popup-value {
+    font-weight: 400;
+    color: #555555;
+  }
+
+  /* Popup Add to Cart button */
+  .banner-custom__popup-btn {
+    margin-top: 8px;
+    width: 100%;
+    padding: 14px 30px;
+  }
+
+  /* ════════════════════════════════════════════
+     RESPONSIVE — Mobile (≤ 749px)
+     Stacks vertically, centers text, image below.
+     Top bar button hides on mobile.
+     ════════════════════════════════════════════ */
+  @media screen and (max-width: 749px) {
+
+    /* Top bar — stack vertically, hide button on small screens */
+    .banner-custom__top-bar-inner {
+      flex-direction: column;
+      gap: 8px;
+      text-align: center;
+    }
+
+    .banner-custom__top-bar-btn {
+      display: none; /* Replaced by hamburger menu in header per Figma mobile */
+    }
+
+    /* Main area — reduce padding, single column */
+    .banner-custom__main {
+      padding: 48px 20px;
+    }
+
+    .banner-custom__main-inner {
+      grid-template-columns: 1fr;
+      gap: 32px;
+      text-align: center;
+    }
+
+    /* Text column — center everything on mobile */
+    .banner-custom__text-col {
+      align-items: center;
+      order: 1; /* Text first on mobile */
+    }
+
+    .banner-custom__heading {
+      font-size: 36px;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+
+    .banner-custom__body {
+      font-size: 15px;
+      margin-bottom: 24px;
+      max-width: 100%;
+    }
+
+    .banner-custom__btn {
+      width: 100%;
+      justify-content: center;
+      padding: 14px 24px;
+    }
+
+    /* Image column — below text on mobile */
+    .banner-custom__image-col {
+      order: 2;
+    }
+
+    /* Popup trigger — adjust position for mobile */
+    .banner-custom__popup-trigger {
+      bottom: 10%;
+      right: 10%;
+    }
+
+    /* Bottom bar */
+    .banner-custom__bottom-bar-text {
+      font-size: 11px;
+      letter-spacing: 1.5px;
+    }
+
+    /* Popup panel — more padding for touch */
+    .banner-custom__popup-panel {
+      padding: 32px 20px;
+    }
+
+    .banner-custom__popup-title {
+      font-size: 20px;
+    }
+
+    .banner-custom__popup-price {
+      font-size: 16px;
+    }
+  }
+
+  /* ════════════════════════════════════════════
+     RESPONSIVE — Tablet (750px – 989px)
+     ════════════════════════════════════════════ */
+  @media screen and (min-width: 750px) and (max-width: 989px) {
+    .banner-custom__main {
+      padding: 60px 24px;
+    }
+
+    .banner-custom__heading {
+      font-size: 42px;
+    }
+
+    .banner-custom__main-inner {
+      gap: 32px;
+    }
+  }
+{% endstyle %}
+
+{%- comment -%}
+  ============================================================================
+  VANILLA JAVASCRIPT — Popup Open/Close
+  ============================================================================
+  No jQuery. Scoped to this section instance using data attributes.
+  Handles: opening popup, closing via X button, closing via backdrop click,
+  closing via Escape key, and focus trapping for accessibility.
+  ============================================================================
+{%- endcomment -%}
+{% if section.settings.popup_product_title != blank %}
+<script>
+  (function() {
+    'use strict';
+
+    /**
+     * Banner Popup Controller
+     * Scoped to section instance: {{ section.id }}
+     * Handles open, close, backdrop click, and keyboard (Escape) events.
+     */
+    var sectionId = '{{ section.id }}';
+    var overlay = document.getElementById('banner-popup-' + sectionId);
+    var openBtn = document.querySelector('[data-banner-popup-open="' + sectionId + '"]');
+
+    /* Exit early if popup elements don't exist */
+    if (!overlay || !openBtn) return;
+
+    var closeBtns = overlay.querySelectorAll('[data-banner-popup-close="' + sectionId + '"]');
+
+    /**
+     * Opens the popup overlay.
+     * Adds 'is-active' class, sets ARIA attributes, prevents body scroll.
+     */
+    function openPopup() {
+      overlay.classList.add('is-active');
+      overlay.setAttribute('aria-hidden', 'false');
+      openBtn.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden'; /* Prevent background scroll */
+
+      /* Focus the close button for keyboard users */
+      var closeBtn = overlay.querySelector('.banner-custom__popup-close');
+      if (closeBtn) closeBtn.focus();
+    }
+
+    /**
+     * Closes the popup overlay.
+     * Removes 'is-active' class, restores ARIA attributes and body scroll.
+     */
+    function closePopup() {
+      overlay.classList.remove('is-active');
+      overlay.setAttribute('aria-hidden', 'true');
+      openBtn.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = ''; /* Restore scroll */
+
+      /* Return focus to the trigger button */
+      openBtn.focus();
+    }
+
+    /* Open button click handler */
+    openBtn.addEventListener('click', openPopup);
+
+    /* Close button(s) click handler — includes X button and backdrop */
+    closeBtns.forEach(function(btn) {
+      btn.addEventListener('click', closePopup);
+    });
+
+    /* Close on Escape key */
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && overlay.classList.contains('is-active')) {
+        closePopup();
+      }
+    });
+  })();
+</script>
+{% endif %}
+
+{%- comment -%}
+  ============================================================================
+  SCHEMA — Theme Customizer Settings
+  ============================================================================
+  Every text element inside a red rectangle in the Figma file has a
+  corresponding setting here. Organized by section area (top bar, main,
+  bottom bar, popup). Includes sensible defaults and clear labels.
+  ============================================================================
+{%- endcomment -%}
+{% schema %}
+{
+  "name": "Banner (Custom)",
+  "tag": "section",
+  "class": "banner-custom-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Top Announcement Bar"
+    },
+    {
+      "type": "text",
+      "id": "top_bar_text",
+      "label": "Announcement Text",
+      "default": "Find the ideal gift for your loved ones.",
+      "info": "Displayed in the gray bar at the top of the banner."
+    },
+    {
+      "type": "text",
+      "id": "top_bar_button_label",
+      "label": "Announcement Button Label",
+      "default": "CHOOSE GIFT",
+      "info": "Yellow CTA button next to the announcement text."
+    },
+    {
+      "type": "url",
+      "id": "top_bar_button_link",
+      "label": "Announcement Button Link"
+    },
+    {
+      "type": "header",
+      "content": "Main Banner Content"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Banner Illustration",
+      "info": "Line-art or decorative image displayed on the right side of the banner."
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "The Gift Guide",
+      "info": "Main heading in serif font. Supports bold and italic."
+    },
+    {
+      "type": "richtext",
+      "id": "body_text",
+      "label": "Body Text",
+      "default": "<p>Discover Joy: Your Ultimate Holiday Gift Destination. Explore our handpicked selection of unique and thoughtful gifts for every occasion.</p>",
+      "info": "Description paragraph below the heading."
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button Label",
+      "default": "SHOP NOW",
+      "info": "Primary CTA button. An arrow (→) is added automatically."
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button Link"
+    },
+    {
+      "type": "header",
+      "content": "Bottom Bar"
+    },
+    {
+      "type": "text",
+      "id": "bottom_bar_text",
+      "label": "Bottom Bar Text",
+      "default": "SUSTAINABLE, ETHICALLY MADE CLOTHES IN SIZES XXS TO 6XL",
+      "info": "Uppercase text displayed in the gray bar below the banner."
+    },
+    {
+      "type": "header",
+      "content": "Product Popup"
+    },
+    {
+      "type": "image_picker",
+      "id": "popup_image",
+      "label": "Product Image",
+      "info": "Product image shown in the quickview popup."
+    },
+    {
+      "type": "text",
+      "id": "popup_product_title",
+      "label": "Product Title",
+      "default": "Holiday Gift Set",
+      "info": "Shown in the popup when the \"+\" button is clicked."
+    },
+    {
+      "type": "text",
+      "id": "popup_price",
+      "label": "Product Price",
+      "default": "$49.99",
+      "info": "Displayed below the product title."
+    },
+    {
+      "type": "text",
+      "id": "popup_colors",
+      "label": "Color Variants",
+      "default": "Red, Green, Gold",
+      "info": "Comma-separated list of available colors."
+    },
+    {
+      "type": "text",
+      "id": "popup_sizes",
+      "label": "Size Options",
+      "default": "S, M, L, XL",
+      "info": "Comma-separated list of available sizes."
+    },
+    {
+      "type": "text",
+      "id": "popup_button_label",
+      "label": "Add to Cart Button Label",
+      "default": "ADD TO CART",
+      "info": "CTA button label inside the popup."
+    },
+    {
+      "type": "url",
+      "id": "popup_button_link",
+      "label": "Add to Cart Button Link",
+      "info": "Where the add-to-cart button links to (e.g., the product page)."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Banner (Custom)",
+      "category": "Image"
+    }
+  ]
+}
+{% endschema %}
