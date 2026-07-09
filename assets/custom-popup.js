@@ -131,6 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
         radioWrapper.className = 'popup-custom__option-values--radio';
         
         option.values.forEach((val, i) => {
+          const valueStr = (typeof val === 'object' && val !== null) ? val.name : val;
           const wrapper = document.createElement('div');
           wrapper.className = 'popup-custom__radio-wrapper';
           
@@ -139,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const input = document.createElement('input');
           input.type = 'radio';
           input.name = optionPosition;
-          input.value = val;
+          input.value = valueStr;
           input.id = inputId;
           input.className = 'popup-custom__radio-input';
           // Select first available or just first
@@ -148,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const lbl = document.createElement('label');
           lbl.htmlFor = inputId;
           lbl.className = 'popup-custom__radio-label';
-          lbl.textContent = val;
+          lbl.textContent = valueStr;
 
           // Event listener for change
           input.addEventListener('change', updateVariantSelection);
@@ -171,9 +172,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // As per Figma spec request, assume placeholder "Choose your size" (optional, but requested implicitly)
         // Since we need a default, we just select the first value to ensure a valid variant ID
         option.values.forEach((val) => {
+          const valueStr = (typeof val === 'object' && val !== null) ? val.name : val;
           const opt = document.createElement('option');
-          opt.value = val;
-          opt.textContent = val;
+          opt.value = valueStr;
+          opt.textContent = valueStr;
           select.appendChild(opt);
         });
 
@@ -188,6 +190,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
       elements.optionsContainer.appendChild(groupDiv);
     });
+
+    // Select the first available variant options
+    const firstAvailable = productData.variants.find(v => v.available);
+    if (firstAvailable) {
+      [1, 2, 3].forEach(num => {
+        const optVal = firstAvailable[`option${num}`];
+        if (optVal) {
+          const input = elements.optionsContainer.querySelector(`[name="option${num}"][value="${optVal.replace(/"/g, '\\"')}"]`);
+          if (input) {
+            if (input.type === 'radio') input.checked = true;
+            else input.value = optVal;
+          }
+        }
+      });
+    }
   }
 
   function updateVariantSelection() {
